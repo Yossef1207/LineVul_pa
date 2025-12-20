@@ -1,0 +1,16 @@
+*/__pycache__
+*.bin
+*.csv
+*.log
+*.jsonl
+*.model
+.vscode/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+.env
+*.ckpt
+*.pth
+*.h5
+*.pt
+*.sav           
