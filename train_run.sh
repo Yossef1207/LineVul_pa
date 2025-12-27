@@ -20,7 +20,7 @@ llms=(codellama gpt-4o)
 cd linevul
 
 for llm in "${llms[@]}"; do
-  echo ">>> Training mit $llm"
+  echo ">>> Training with $llm"
 
   python linevul_main.py \
     --output_dir=./saved_models_with_"$llm" \
