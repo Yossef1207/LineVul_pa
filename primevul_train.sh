@@ -25,9 +25,9 @@ python linevul_main.py \
       --model_name_or_path=microsoft/codebert-base \
       --do_train \
       --do_test \
-      --train_data_file=../data/primevul/train.csv \
-      --eval_data_file=../data/primevul/val.csv \
-      --test_data_file=../data/primevul/test.csv \
+      --train_data_file=../data/primevul_dataset/train.csv \
+      --eval_data_file=../data/primevul_dataset/val.csv \
+      --test_data_file=../data/primevul_dataset/test.csv \
       --epochs 10 \
       --block_size 512 \
       --train_batch_size 16 \
@@ -50,8 +50,8 @@ for llm in "${llms[@]}"; do
     --do_train \
     --do_test \
     --train_data_file=../data/primevul_with_"$llm"/train_aug.csv \
-    --eval_data_file=../data/primevul/val.csv \
-    --test_data_file=../data/primevul/test.csv \
+    --eval_data_file=../data/primevul_dataset/val.csv \
+    --test_data_file=../data/primevul_dataset/test.csv \
     --epochs 10 \
     --block_size 512 \
     --train_batch_size 16 \
