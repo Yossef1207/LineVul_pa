@@ -29,12 +29,15 @@ It is expected to download the ReposVul_c dataset of C language and name it : `R
 ## Running 03_augment to merge ReposVul with codellama non-vul + vul 
 
 ``cd ../llm_datasets``  
-``python 03_augment_with_llm.py --raw_train ../reposvul_dataset/train.csv --csv_vuln codellama-34b_vuln.csv --csv_nonvuln codellama-34b_non-vuln.csv --out_dir ../reposvul_with_codellama``
+``python 03_augment_with_llm.py --raw_train ../reposvul_dataset/train.csv --csv_vuln codellama-34b_vuln.csv --csv_nonvuln codellama-34b_non-vuln.csv --out_dir ../reposvul_with_codellama``  
 
+To augment the raw dataset with only vulnerable samples from llm dataset simply remove the argument ``--csv_nonvuln gpt-4o_non-vuln.csv``    
 
 ### Running 03_augment to merge ReposVul with gpt-4o non-vul + vul 
 
-``python 03_augment_with_llm.py --raw_train ../reposvul_dataset/train.csv --csv_vuln gpt-4o_vuln.csv --csv_nonvuln gpt-4o_non-vuln.csv --out_dir ../reposvul_with_gpt-4o``
+``python 03_augment_with_llm.py --raw_train ../reposvul_dataset/train.csv --csv_vuln gpt-4o_vuln.csv --csv_nonvuln gpt-4o_non-vuln.csv --out_dir ../reposvul_with_gpt-4o``   
+
+To augment the raw dataset with only vulnerable samples from llm dataset simply remove the argument ``--csv_nonvuln gpt-4o_non-vuln.csv``   
 
 ## Running 02_transform_dataset to transform PrimeVul Dataset
 
@@ -49,11 +52,15 @@ After Downloading primevul_{train,test,valid}.jsonl in this folder run:
 ## Running 03_augment to merge PrimeVul with codellama non-vul + vul 
 ``cd ../llm_datasets``
 
-``python 03_augment_with_llm.py --raw_train ../primevul_dataset/train.csv --csv_vuln codellama-34b_vuln.csv --csv_nonvuln codellama-34b_non-vuln.csv --out_dir ../primevul_with_codellama``
+``python 03_augment_with_llm.py --raw_train ../primevul_dataset/train.csv --csv_vuln codellama-34b_vuln.csv --csv_nonvuln codellama-34b_non-vuln.csv --out_dir ../primevul_with_codellama``  
+
+To augment the raw dataset with only vulnerable samples from llm dataset simply remove the argument ``--csv_nonvuln gpt-4o_non-vuln.csv``  
 
 ### Running 03_augment to merge PrimeVul with gpt-4o non-vul + vul 
 
-``python 03_augment_with_llm.py --raw_train ../primevul_dataset/train.csv --csv_vuln gpt-4o-34b_vuln.csv --csv_nonvuln gpt-4o-34b_non-vuln.csv --out_dir ../primevul_with_gpt-4o``
+``python 03_augment_with_llm.py --raw_train ../primevul_dataset/train.csv --csv_vuln gpt-4o_vuln.csv --csv_nonvuln gpt-4o_non-vuln.csv --out_dir ../primevul_with_gpt-4o``  
+
+To augment the raw dataset with only vulnerable samples from llm dataset simply remove the argument ``--csv_nonvuln gpt-4o_non-vuln.csv``  
 
 ## Running Training Scripts
 

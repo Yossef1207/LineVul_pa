@@ -12,7 +12,7 @@ Inputs:
 
 - Synthetic CSVs:
     - codelama_vulnerable.csv (required)
-    - codelama_non_vulnerable.csv (required)
+    - codelama_non_vulnerable.csv (optional; if omitted, only vulnerable synthetic samples are used)
 
 Outputs:
 - out_dir/train_aug.csv (always)
@@ -137,23 +137,21 @@ def _select_code_series(df: pd.DataFrame) -> pd.Series:
     raise ValueError("Synthetic CSV must contain 'processed_func' or 'code'.")
 
 
-def synth_to_reposvul_rows(vuln_csv: str, nonvuln_csv: str, keep_only_complete: bool) -> pd.DataFrame:
+def synth_to_reposvul_rows(vuln_csv: str, nonvuln_csv: Optional[str], keep_only_complete: bool) -> pd.DataFrame:
     """
     Convert synthetic CSVs to ReposVul format using processed_func when available.
 
     """
     v = pd.read_csv(vuln_csv)
-    n = pd.read_csv(nonvuln_csv)
+    n = pd.read_csv(nonvuln_csv) if nonvuln_csv is not None else None
 
     # Optional quality filter
     if keep_only_complete and "is_complete" in v.columns:
         v = v[v["is_complete"] == True]
-    if keep_only_complete and "is_complete" in n.columns:
+    if n is not None and keep_only_complete and "is_complete" in n.columns:
         n = n[n["is_complete"] == True]
 
     v_code = _select_code_series(v).map(clean_code)
-    n_code = _select_code_series(n).map(clean_code)
-
     v_out = pd.DataFrame({
         "processed_func": v_code,
         "target": 1,  # forced
@@ -165,18 +163,23 @@ def synth_to_reposvul_rows(vuln_csv: str, nonvuln_csv: str, keep_only_complete: 
         "file_language": "C",
     })
 
-    n_out = pd.DataFrame({
-        "processed_func": n_code,
-        "target": 0,  # forced
-        "vul_func_with_fix": "-",
-        "cve_id": "-",
-        "cwe_id": "['-']",
-        "commit_id": "-",
-        "file_path": "-",
-        "file_language": "C",
-    })
+    parts = [v_out]
 
-    out = pd.concat([v_out, n_out], ignore_index=True)
+    if n is not None:
+        n_code = _select_code_series(n).map(clean_code)
+        n_out = pd.DataFrame({
+            "processed_func": n_code,
+            "target": 0,  # forced
+            "vul_func_with_fix": "-",
+            "cve_id": "-",
+            "cwe_id": "['-']",
+            "commit_id": "-",
+            "file_path": "-",
+            "file_language": "C",
+        })
+        parts.append(n_out)
+
+    out = pd.concat(parts, ignore_index=True)
 
     # Drop empty code
     out = out[out["processed_func"].str.len() > 0].copy()
@@ -217,7 +220,8 @@ def main():
     ap.add_argument("--raw_test", required=False, default=None, help="Path to reposvul test.csv (optional)")
 
     ap.add_argument("--csv_vuln", required=True, help="Path to codelama_vulnerable.csv")
-    ap.add_argument("--csv_nonvuln", required=True, help="Path to codelama_non_vulnerable.csv")
+    ap.add_argument("--csv_nonvuln", required=False, default=None,
+                    help="Path to codelama_non_vulnerable.csv (optional; if omitted, only vulnerable synthetic samples are used)")
 
     ap.add_argument("--out_dir", required=True, help="Output directory")
 
