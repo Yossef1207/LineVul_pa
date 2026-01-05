@@ -168,13 +168,15 @@ def iter_rows(jsonl_path: str, filter_lang: str, stats: Counter, debug_n: int = 
                 "processed_func": before_code,
                 "target": int(label),
                 "vul_func_with_fix": after_code,
-
                 # optional metadata for tracing
                 "cve_id": obj.get("cve_id") or "",
                 "cwe_id": obj.get("cwe_id") or "",
                 "commit_id": obj.get("commit_id") or "",
                 "file_path": d.get("file_path") or "",
                 "file_language": file_lang,
+                # additional columns for flaw location
+                "flaw_line_index": [],  # leere Liste
+                "flaw_line": "",      # leerer String
             }
 
 def write_csv(rows: Iterable[Dict[str, Any]], out_csv: str, fieldnames: List[str]) -> int:
@@ -242,7 +244,8 @@ def main():
 
     fieldnames = [
         "processed_func", "target", "vul_func_with_fix",
-        "cve_id", "cwe_id", "commit_id", "file_path", "file_language"
+        "cve_id", "cwe_id", "commit_id", "file_path", "file_language",
+        "flaw_line_index", "flaw_line",
     ]
 
     def transform_one(in_path: str, out_path: str) -> Tuple[int, Counter]:
