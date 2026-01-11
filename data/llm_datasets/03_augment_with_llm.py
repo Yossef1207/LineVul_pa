@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Augment a transformed ReposVul dataset with synthetic samples.
+Augment a transformed raw_dataset dataset with synthetic samples.
 
 Inputs:
-- ReposVul (transformed) CSVs:
+- raw_dataset (transformed) CSVs:
     - train.csv (required)
     - val.csv   (optional; if not provided, auto-detect in same folder as train.csv)
     - test.csv  (optional; if not provided, auto-detect in same folder as train.csv)
@@ -73,9 +73,9 @@ def stable_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8", errors="ignore")).hexdigest()
 
 
-def ensure_reposvul_schema(df: pd.DataFrame) -> pd.DataFrame:
+def ensure_raw_dataset_schema(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Ensure the dataframe contains the ReposVul/LineVul expected columns.
+    Ensure the dataframe contains the raw_dataset/LineVul expected columns.
     """
     required_cols = [
         "processed_func", "target", "vul_func_with_fix",
@@ -137,9 +137,9 @@ def _select_code_series(df: pd.DataFrame) -> pd.Series:
     raise ValueError("Synthetic CSV must contain 'processed_func' or 'code'.")
 
 
-def synth_to_reposvul_rows(vuln_csv: str, nonvuln_csv: Optional[str], keep_only_complete: bool) -> pd.DataFrame:
+def synth_to_raw_dataset_rows(vuln_csv: str, nonvuln_csv: Optional[str], keep_only_complete: bool) -> pd.DataFrame:
     """
-    Convert synthetic CSVs to ReposVul format using processed_func when available.
+    Convert synthetic CSVs to raw_dataset format using processed_func when available.
 
     """
     v = pd.read_csv(vuln_csv)
@@ -184,7 +184,7 @@ def synth_to_reposvul_rows(vuln_csv: str, nonvuln_csv: Optional[str], keep_only_
     # Drop empty code
     out = out[out["processed_func"].str.len() > 0].copy()
 
-    return ensure_reposvul_schema(out)
+    return ensure_raw_dataset_schema(out)
 
 
 def auto_detect_split(train_csv: str, split_name: str) -> Optional[str]:
@@ -215,9 +215,9 @@ def add_index_column(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--raw_train", required=True, help="Path to reposvul train.csv")
-    ap.add_argument("--raw_val", required=False, default=None, help="Path to reposvul val.csv (optional)")
-    ap.add_argument("--raw_test", required=False, default=None, help="Path to reposvul test.csv (optional)")
+    ap.add_argument("--raw_train", required=True, help="Path to raw_dataset train.csv")
+    ap.add_argument("--raw_val", required=False, default=None, help="Path to raw_dataset val.csv (optional)")
+    ap.add_argument("--raw_test", required=False, default=None, help="Path to raw_dataset test.csv (optional)")
 
     ap.add_argument("--csv_vuln", required=True, help="Path to codelama_vulnerable.csv")
     ap.add_argument("--csv_nonvuln", required=False, default=None,
@@ -228,7 +228,7 @@ def main():
     ap.add_argument("--dedup_within_synth", action="store_true",
                     help="Deduplicate synthetic samples by processed_func hash")
     ap.add_argument("--dedup_against_raw_train", action="store_true",
-                    help="Remove synthetic samples that overlap with reposvul train by processed_func hash")
+                    help="Remove synthetic samples that overlap with raw_dataset train by processed_func hash")
     ap.add_argument("--keep_only_complete", action="store_true",
                     help="Keep only synth rows where is_complete == True (if column exists)")
     ap.add_argument("--augment_split", choices=["train_only", "all"], default="train_only",
@@ -236,18 +236,18 @@ def main():
 
     args = ap.parse_args()
 
-    # Load reposvul train
-    train = ensure_reposvul_schema(pd.read_csv(args.raw_train))
+    # Load raw_dataset train
+    train = ensure_raw_dataset_schema(pd.read_csv(args.raw_train))
 
     # Resolve val/test paths (optional)
     val_path = args.raw_val or auto_detect_split(args.raw_train, "val")
     test_path = args.raw_test or auto_detect_split(args.raw_train, "test")
 
-    val = ensure_reposvul_schema(pd.read_csv(val_path)) if val_path else None
-    test = ensure_reposvul_schema(pd.read_csv(test_path)) if test_path else None
+    val = ensure_raw_dataset_schema(pd.read_csv(val_path)) if val_path else None
+    test = ensure_raw_dataset_schema(pd.read_csv(test_path)) if test_path else None
 
     # Build synth rows
-    synth = synth_to_reposvul_rows(
+    synth = synth_to_raw_dataset_rows(
         vuln_csv=args.csv_vuln,
         nonvuln_csv=args.csv_nonvuln,
         keep_only_complete=args.keep_only_complete,
@@ -271,11 +271,11 @@ def main():
         test_aug = pd.concat([test, synth], ignore_index=True) if test is not None else None
 
     # Final cleanup
-    train_aug = ensure_reposvul_schema(train_aug[train_aug["processed_func"].str.len() > 0].copy())
+    train_aug = ensure_raw_dataset_schema(train_aug[train_aug["processed_func"].str.len() > 0].copy())
     if val_aug is not None:
-        val_aug = ensure_reposvul_schema(val_aug[val_aug["processed_func"].str.len() > 0].copy())
+        val_aug = ensure_raw_dataset_schema(val_aug[val_aug["processed_func"].str.len() > 0].copy())
     if test_aug is not None:
-        test_aug = ensure_reposvul_schema(test_aug[test_aug["processed_func"].str.len() > 0].copy())
+        test_aug = ensure_raw_dataset_schema(test_aug[test_aug["processed_func"].str.len() > 0].copy())
 
     # Add explicit index column as first column
     train_aug = add_index_column(train_aug)
@@ -320,7 +320,7 @@ We deduplicate synthetically generated samples by function body to prevent train
 --dedup_within_synth: Remove duplicate synthetic samples within the synthetic dataset itself.
 When generating synthetic data, large language models may produce identical or near-identical code snippets multiple times. This option ensures that each synthetic sample is unique within the synthetic dataset.
 
---dedup_against_raw_train: Remove synthetic samples that overlap with reposvul train by processed_func hash.
+--dedup_against_raw_train: Remove synthetic samples that overlap with raw_dataset train by processed_func hash.
 To avoid implicit data leakage and artificial performance gains, synthetic samples that overlap with the original training set are removed.
 
 --keep_only_complete: Keep only synthetic rows where is_complete == True (if column exists).
