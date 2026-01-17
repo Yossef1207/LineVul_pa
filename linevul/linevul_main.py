@@ -237,7 +237,7 @@ def evaluate(args, model, tokenizer, eval_dataset, eval_when_training=False):
     #calculate scores
     logits = np.concatenate(logits,0)
     y_trues = np.concatenate(y_trues,0)
-    best_threshold = 0.5
+    best_threshold = 0.05
     best_f1 = 0
     y_preds = logits[:,1]>best_threshold
     recall = recall_score(y_trues, y_preds)
@@ -1260,7 +1260,7 @@ def main():
         model.load_state_dict(torch.load(output_dir, map_location=args.device), strict=False)
         model.to(args.device)
         test_dataset = TextDataset(tokenizer, args, file_type='test')
-        test(args, model, tokenizer, test_dataset, best_threshold=0.5)
+        test(args, model, tokenizer, test_dataset, best_threshold=0.05)
     return results
 
 if __name__ == "__main__":
