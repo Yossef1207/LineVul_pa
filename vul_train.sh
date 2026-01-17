@@ -33,7 +33,7 @@ conda activate linevul
 
 nproc_per_node=1
 
-########################   RepoSVul Training   ########################
+# ########################   RepoSVul Training   ########################
 
 cd "$WORKDIR/linevul"
 

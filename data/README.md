@@ -69,3 +69,19 @@ If you are still in ``llm_datasets`` folder run:
 
 You find now 2 Scripts: primevul_train.sh and reposvul_train.sh which run the whole experiment. 
 
+
+
+# Training auf GCL4SVD 
+
+``cd /work/cps/czt0517/GCL4SVD_fork/GCL4SVD/SVD-GGNN/data_process``  
+
+
+python csv_to_jsonl.py ../../../../LineVul_pa/data/primevul_dataset/train.csv -o primevul_train.jsonl
+python csv_to_jsonl.py ../../../../LineVul_pa/data/primevul_dataset/val.csv -o primevul_val.jsonl
+python csv_to_jsonl.py ../../../../LineVul_pa/data/primevul_dataset/test.csv -o primevul_test.jsonl
+
+
+python csv_to_jsonl.py ../../../../LineVul_pa/data/reposvul_dataset/train.csv -o reposvul_train.jsonl
+python csv_to_jsonl.py ../../../../LineVul_pa/data/reposvul_dataset/val.csv -o reposvul_val.jsonl
+python csv_to_jsonl.py ../../../../LineVul_pa/data/reposvul_dataset/test.csv -o reposvul_test.jsonl
+

@@ -66,6 +66,7 @@ def is_c_function(sample: Dict) -> bool:
 def extract_c_functions(jsonl_path: str, csv_path: str) -> None:
     total = 0
     kept = 0
+    row_index = 0
 
     with open(jsonl_path, "r", encoding="utf-8") as f_in, \
             open(csv_path, "w", encoding="utf-8", newline="") as f_out:
@@ -73,6 +74,7 @@ def extract_c_functions(jsonl_path: str, csv_path: str) -> None:
         writer = csv.writer(f_out)
         # Spalten entsprechend der gewünschten Zielstruktur
         writer.writerow([
+            "index",            # laufender Index der Zeile
             "processed_func",   # Funktionscode aus "func"
             "target",           # Label aus "target"
             "vul_func_with_fix",  # hier konstant "-"
@@ -121,6 +123,7 @@ def extract_c_functions(jsonl_path: str, csv_path: str) -> None:
             flaw_line = ""
 
             writer.writerow([
+                row_index,
                 processed_func,
                 target,
                 vul_func_with_fix,
@@ -132,6 +135,7 @@ def extract_c_functions(jsonl_path: str, csv_path: str) -> None:
                 flaw_line_index,
                 flaw_line,
             ])
+            row_index += 1
             kept += 1
 
     print(f"Fertig. Insgesamt Zeilen gelesen: {total}, C-Funktionen geschrieben: {kept}")

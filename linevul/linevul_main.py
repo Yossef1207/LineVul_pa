@@ -34,7 +34,7 @@ from linevul_model import Model
 import pandas as pd
 # metrics
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, PrecisionRecallDisplay
-from sklearn.metrics import auc
+from sklearn.metrics import auc, confusion_matrix
 import matplotlib.pyplot as plt
 # model reasoning
 from captum.attr import LayerIntegratedGradients, DeepLift, DeepLiftShap, GradientShap, Saliency
@@ -289,6 +289,20 @@ def test(args, model, tokenizer, test_dataset, best_threshold=0.5):
     logits = np.concatenate(logits, 0)
     y_trues = np.concatenate(y_trues, 0)
     y_preds = logits[:, 1] > best_threshold
+
+    # Confusion-Matrix und True-Positive-Indizes
+    cm = confusion_matrix(y_trues, y_preds)
+    logger.info("Confusion matrix:\n%s", cm)
+
+    tp_indices = np.where((y_trues == 1) & (y_preds == 1))[0]
+    tn_indices = np.where((y_trues == 0) & (y_preds == 0))[0]
+    fp_indices = np.where((y_trues == 0) & (y_preds == 1))[0]
+    fn_indices = np.where((y_trues == 1) & (y_preds == 0))[0]
+
+    logger.info("True Positive indices (dataset order): %s", tp_indices.tolist())
+    logger.info("True Negative indices (dataset order): %s", tn_indices.tolist())
+    logger.info("False Positive indices (dataset order): %s", fp_indices.tolist())
+    logger.info("False Negative indices (dataset order): %s", fn_indices.tolist())
     acc = accuracy_score(y_trues, y_preds)
     recall = recall_score(y_trues, y_preds)
     precision = precision_score(y_trues, y_preds)   
