@@ -14,9 +14,9 @@ def normalize_variant_name(variant: str) -> str:
     """Prettify train_variant names for plotting."""
     mapping = {
         "only": "only",
-        "codellama": "CodeLLaMA",
+        "codellama": "CodeLLaMA-34b",
         "gpt-4o": "GPT-4o",
-        "vul_codellama": "Vul_CodeLLaMA",
+        "vul_codellama": "Vul_CodeLLaMA-34b",
         "vul_gpt-4o": "Vul_GPT-4o",
     }
     return mapping.get(variant, variant)
@@ -122,3 +122,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+"""
+ python plot_metrics.py best_testing_logs/summerized_results.csv -o plots
+"""
