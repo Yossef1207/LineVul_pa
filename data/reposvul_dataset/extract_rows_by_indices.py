@@ -40,17 +40,45 @@ def main():
         "indices",
         help=(
             "Liste der Indizes, entweder als Python-Liste (z.B. '[2, 67, 71]') "
-            "oder als Komma-getrennte Liste (z.B. '2,67,71'). Indizes sind 0-basiert "
-            "wie in den Logs (dataset order)."
+            "oder als Komma-getrennte Liste (z.B. '2,67,71'), oder 'all' für alle "
+            "Zeilen. Indizes sind 0-basiert wie in den Logs (dataset order)."
+        ),
+    )
+    parser.add_argument(
+        "--columns",
+        "-c",
+        help=(
+            "Optionale Komma-getrennte Liste von Spaltennamen aus dem Header, "
+            "die in die Ausgabe übernommen werden sollen. Standard: alle Spalten."
+        ),
+    )
+    parser.add_argument(
+        "--filter-column",
+        "-fc",
+        help=(
+            "Optional: Name einer Spalte, nach der gefiltert werden soll (z.B. 'cwe_id')."
+        ),
+    )
+    parser.add_argument(
+        "--filter-value",
+        "-fv",
+        help=(
+            "Optional: Filterwert, der in der angegebenen Spalte vorkommen muss. "
+            "Es wird eine einfache Teilstring-Suche gemacht, z.B. 'CWE-362' in "
+            "cwe_id-Spalte, die JSON-Listen wie ['CWE-362'] enthält."
         ),
     )
 
     args = parser.parse_args()
-    indices = sorted(set(parse_indices(args.indices)))
+    raw_indices = args.indices.strip()
+    if raw_indices.lower() == "all":
+        indices = None  # keine Einschränkung nach Zeilenindex
+    else:
+        indices = sorted(set(parse_indices(raw_indices)))
 
-    if not indices:
-        print("Keine gültigen Indizes angegeben.")
-        return
+        if not indices:
+            print("Keine gültigen Indizes angegeben.")
+            return
 
     # CSV-Modul für sehr große Felder konfigurieren (z.B. Quellcode-Spalten)
     try:
@@ -69,16 +97,52 @@ def main():
     with open(args.csv_path, newline="", encoding="utf-8") as f_in, open(
         out_path, "w", encoding="utf-8"
     ) as f_out:
-        reader = csv.reader(f_in)
-        header = next(reader, None)
+        reader = csv.DictReader(f_in)
 
-        # Header optional oben in die TXT-Datei schreiben
-        if header is not None:
-            f_out.write(",".join(header) + "\n")
+        if reader.fieldnames is None:
+            print("CSV-Datei hat keinen Header.", file=sys.stderr)
+            sys.exit(1)
+
+        # Spaltenauswahl vorbereiten
+        if args.columns:
+            selected_columns = [
+                col.strip() for col in args.columns.split(",") if col.strip()
+            ]
+        else:
+            selected_columns = list(reader.fieldnames)
+
+        # Prüfen, ob alle gewünschten Spalten existieren
+        missing = [c for c in selected_columns if c not in reader.fieldnames]
+        if missing:
+            print(
+                "Folgende Spalten wurden angefordert, existieren aber nicht im Header: "
+                + ", ".join(missing),
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Header schreiben (nur ausgewählte Spalten)
+        f_out.write(",".join(selected_columns) + "\n")
 
         for row_idx, row in enumerate(reader):
-            if row_idx in indices:
-                f_out.write(",".join(row) + "\n")
+            # Falls Indizes angegeben wurden, nur diese Zeilen berücksichtigen
+            if indices is not None and row_idx not in indices:
+                continue
+
+            # Optionaler Spalten-Filter
+            if args.filter_column and args.filter_value is not None:
+                cell = row.get(args.filter_column, "")
+                if cell is None:
+                    cell = ""
+                else:
+                    cell = str(cell)
+
+                # Einfache Teilstring-Suche, z.B. "CWE-362" in "['CWE-362']"
+                if args.filter_value not in cell:
+                    continue
+
+            values = [row.get(col, "") or "" for col in selected_columns]
+            f_out.write(",".join(values) + "\n")
 
     print(f"Geschriebene Datei: {out_path}")
 

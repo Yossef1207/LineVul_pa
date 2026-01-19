@@ -20,26 +20,27 @@ def looks_like_cpp(func: str) -> bool:
         "template<",
         "std::",
         "using namespace",
-        " class ",
-        " struct ",  # struct gibt es auch in C, aber oft in C++-Klassen
         "new ",
         "delete ",
-        " operator<",
-        " operator>",
-        " operator==",
-        " operator!=",
-        " try {",
-        " catch (",
-        " noexcept",
-        " nullptr",
-        " friend ",
-        " virtual ",
+        "noexcept",
+        "nullptr",
+        "friend ",
+        "virtual ",
         "public:",
         "private:",
         "protected:",
+        "constexpr",
+        "decltype",
+        "typename",
+        "explicit",
+        "mutable",
+        "static_cast<",
+        "dynamic_cast<",
+        "reinterpret_cast<",
+        "const_cast<",
     ]
 
-    lower = func
+    lower = func.lower()
     for marker in cpp_markers:
         if marker in lower:
             return True

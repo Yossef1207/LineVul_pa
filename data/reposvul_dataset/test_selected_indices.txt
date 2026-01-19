@@ -1,112 +1,163 @@
 index,processed_func,target,vul_func_with_fix,cve_id,cwe_id,commit_id,file_path,file_language,flaw_line_index,flaw_line
-35,void IMB_flipy(struct ImBuf *ibuf)
-{
-  int x, y;
-
-  if (ibuf == NULL) {
-    return;
-  }
-
-  if (ibuf->rect) {
-    unsigned int *top, *bottom, *line;
-
-    x = ibuf->x;
-    y = ibuf->y;
-
-    top = ibuf->rect;
-    bottom = top + ((y - 1) * x);
-    line = MEM_mallocN(x * sizeof(int), "linebuf");
-
-    y >>= 1;
-
-    for (; y > 0; y--) {
-      memcpy(line, top, x * sizeof(int));
-      memcpy(top, bottom, x * sizeof(int));
-      memcpy(bottom, line, x * sizeof(int));
-      bottom -= x;
-      top += x;
-    }
-
-    MEM_freeN(line);
-  }
-
-  if (ibuf->rect_float) {
-    float *topf = NULL, *bottomf = NULL, *linef = NULL;
-
-    x = ibuf->x;
-    y = ibuf->y;
-
-    topf = ibuf->rect_float;
-    bottomf = topf + 4 * ((y - 1) * x);
-    linef = MEM_mallocN(4 * x * sizeof(float), "linebuf");
-
-    y >>= 1;
-
-    for (; y > 0; y--) {
-      memcpy(linef, topf, 4 * x * sizeof(float));
-      memcpy(topf, bottomf, 4 * x * sizeof(float));
-      memcpy(bottomf, linef, 4 * x * sizeof(float));
-      bottomf -= 4 * x;
-      topf += 4 * x;
-    }
-
-    MEM_freeN(linef);
-  }
-},1,void IMB_flipy(struct ImBuf *ibuf)
-{
-  size_t x_size, y_size;
-
-  if (ibuf == NULL) {
-    return;
-  }
-
-  if (ibuf->rect) {
-    unsigned int *top, *bottom, *line;
-
-    x_size = ibuf->x;
-    y_size = ibuf->y;
-
-    const size_t stride = x_size * sizeof(int);
-
-    top = ibuf->rect;
-    bottom = top + ((y_size - 1) * x_size);
-    line = MEM_mallocN(stride, "linebuf");
-
-    y_size >>= 1;
-
-    for (; y_size > 0; y_size--) {
-      memcpy(line, top, stride);
-      memcpy(top, bottom, stride);
-      memcpy(bottom, line, stride);
-      bottom -= x_size;
-      top += x_size;
-    }
-
-    MEM_freeN(line);
-  }
-
-  if (ibuf->rect_float) {
-    float *topf = NULL, *bottomf = NULL, *linef = NULL;
-
-    x_size = ibuf->x;
-    y_size = ibuf->y;
-
-    const size_t stride = x_size * 4 * sizeof(float);
-
-    topf = ibuf->rect_float;
-    bottomf = topf + 4 * ((y_size - 1) * x_size);
-    linef = MEM_mallocN(stride, "linebuf");
-
-    y_size >>= 1;
-
-    for (; y_size > 0; y_size--) {
-      memcpy(linef, topf, stride);
-      memcpy(topf, bottomf, stride);
-      memcpy(bottomf, linef, stride);
-      bottomf -= 4 * x_size;
-      topf += 4 * x_size;
-    }
-
-    MEM_freeN(linef);
-  }
-},CVE-2022-0545,['CWE-190'],82858ca3f4e6dc6f840af9306c350900abd491fc,files/2022_2/132,c,[],
+162,static void skel(const char *homedir, uid_t u, gid_t g) {
+	char *fname;
+	// zsh
+	if (arg_zsh) {
+		// copy skel files
+		if (asprintf(&fname, "%s/.zshrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0)
+			return;
+		if (stat("/etc/skel/.zshrc", &s) == 0) {
+			if (is_link("/etc/skel/.zshrc")) {
+				fprintf(stderr, "Error: invalid /etc/skel/.zshrc file\n");
+				exit(1);
+			}
+			if (copy_file("/etc/skel/.zshrc", fname) == 0) {
+				if (chown(fname, u, g) == -1)
+					errExit("chown");
+				fs_logger("clone /etc/skel/.zshrc");
+			}
+		}
+		else { // 
+			FILE *fp = fopen(fname, "w");
+			if (fp) {
+				fprintf(fp, "\n");
+				fclose(fp);
+				if (chown(fname, u, g) == -1)
+					errExit("chown");
+				if (chmod(fname, S_IRUSR | S_IWUSR) < 0)
+					errExit("chown");
+				fs_logger2("touch", fname);
+			}
+		}
+		free(fname);
+	}
+	// csh
+	else if (arg_csh) {
+		// copy skel files
+		if (asprintf(&fname, "%s/.cshrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0)
+			return;
+		if (stat("/etc/skel/.cshrc", &s) == 0) {
+			if (is_link("/etc/skel/.cshrc")) {
+				fprintf(stderr, "Error: invalid /etc/skel/.cshrc file\n");
+				exit(1);
+			}
+			if (copy_file("/etc/skel/.cshrc", fname) == 0) {
+				if (chown(fname, u, g) == -1)
+					errExit("chown");
+				fs_logger("clone /etc/skel/.cshrc");
+			}
+		}
+		else { // 
+			/* coverity[toctou] */
+			FILE *fp = fopen(fname, "w");
+			if (fp) {
+				fprintf(fp, "\n");
+				fclose(fp);
+				if (chown(fname, u, g) == -1)
+					errExit("chown");
+				if (chmod(fname, S_IRUSR | S_IWUSR) < 0)
+					errExit("chown");
+				fs_logger2("touch", fname);
+			}
+		}
+		free(fname);
+	}
+	// bash etc.
+	else {
+		// copy skel files
+		if (asprintf(&fname, "%s/.bashrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0)
+			return;
+		if (stat("/etc/skel/.bashrc", &s) == 0) {
+			if (is_link("/etc/skel/.bashrc")) {
+				fprintf(stderr, "Error: invalid /etc/skel/.bashrc file\n");
+				exit(1);
+			}
+			if (copy_file("/etc/skel/.bashrc", fname) == 0) {
+				/* coverity[toctou] */
+				if (chown(fname, u, g) == -1)
+					errExit("chown");
+				fs_logger("clone /etc/skel/.bashrc");
+			}
+		}
+		free(fname);
+	}
+},1,static void skel(const char *homedir, uid_t u, gid_t g) {
+	char *fname;
+	// zsh
+	if (arg_zsh) {
+		// copy skel files
+		if (asprintf(&fname, "%s/.zshrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0)
+			return;
+		if (is_link(fname)) { // stat on dangling symlinks fails, try again using lstat
+			fprintf(stderr, "Error: invalid %s file\n", fname);
+			exit(1);
+		}
+		if (stat("/etc/skel/.zshrc", &s) == 0) {
+			copy_file_as_user("/etc/skel/.zshrc", fname, u, g, 0644); // regular user
+			fs_logger("clone /etc/skel/.zshrc");
+		}
+		else {
+			touch_file_as_user(fname, u, g, 0644);
+			fs_logger2("touch", fname);
+		}
+		free(fname);
+	}
+	// csh
+	else if (arg_csh) {
+		// copy skel files
+		if (asprintf(&fname, "%s/.cshrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0)
+			return;
+		if (is_link(fname)) { // stat on dangling symlinks fails, try again using lstat
+			fprintf(stderr, "Error: invalid %s file\n", fname);
+			exit(1);
+		}
+		if (stat("/etc/skel/.cshrc", &s) == 0) {
+			copy_file_as_user("/etc/skel/.cshrc", fname, u, g, 0644); // regular user
+			fs_logger("clone /etc/skel/.cshrc");
+		}
+		else {
+			touch_file_as_user(fname, u, g, 0644);
+			fs_logger2("touch", fname);
+		}
+		free(fname);
+	}
+	// bash etc.
+	else {
+		// copy skel files
+		if (asprintf(&fname, "%s/.bashrc", homedir) == -1)
+			errExit("asprintf");
+		struct stat s;
+		// don't copy it if we already have the file
+		if (stat(fname, &s) == 0) 
+			return;
+		if (is_link(fname)) { // stat on dangling symlinks fails, try again using lstat
+			fprintf(stderr, "Error: invalid %s file\n", fname);
+			exit(1);
+		}
+		if (stat("/etc/skel/.bashrc", &s) == 0) {
+			copy_file_as_user("/etc/skel/.bashrc", fname, u, g, 0644); // regular user
+			fs_logger("clone /etc/skel/.bashrc");
+		}
+		free(fname);
+	}
+},CVE-2017-5940,['CWE-284', 'CWE-269'],903fd8a0789ca3cc3c21d84cd0282481515592ef,files/2017_2/107,c,[],
