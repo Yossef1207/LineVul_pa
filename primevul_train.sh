@@ -33,10 +33,11 @@ conda activate linevul
 
 nproc_per_node=1
 
-########################   PrimeVul Training   ########################
-
 cd "$WORKDIR/linevul"
 
+llms=(codellama gpt-4o)
+
+########################   PrimeVul Training   ########################
 
 python linevul_main.py \
 			--output_dir=./saved_models_with_primevul \
@@ -57,7 +58,7 @@ python linevul_main.py \
 			--evaluate_during_training \
 			--seed 123456  2>&1 | tee "train_with_primevul_only.log"
 
-llms=(codellama gpt-4o)
+
 
 ########################   PrimeVul Training LLM Vul + Non-Vul ########################
 

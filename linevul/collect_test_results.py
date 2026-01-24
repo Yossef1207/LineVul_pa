@@ -124,8 +124,8 @@ def main() -> None:
     parser.add_argument(
         "log_dir",
         nargs="?",
-        default="./testing_logs",
-        help="Directory containing test_with_*.log files (default: ./testing_logs)",
+        default="./best_testing_logs",
+        help="Directory containing test_with_*.log files (default: ./best_testing_logs)",
     )
     parser.add_argument(
         "--output",
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 """
 cd LineVul_pa/linevul
 
-# Standard: liest ./testing_logs und schreibt test_summary_results.csv dort hinein
+# Standard: liest ./best_testing_logs und schreibt test_summary_results.csv dort hinein
 python collect_test_results.py
 
 # Oder mit explizitem Pfad und Ausgabedatei
