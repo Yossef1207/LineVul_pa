@@ -83,13 +83,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Plot evaluation metrics (accuracy, F1, precision, recall) per dataset "
-            "from a summary CSV wie summerized_results.csv."
+            "from a summary CSV wie test_summary_results.csv."
         )
     )
     parser.add_argument(
         "summary_csv",
         help=(
-            "Pfad zur CSV (z.B. summerized_results.csv) mit Spalten: "
+            "Pfad zur CSV (z.B. test_summary_results.csv) mit Spalten: "
             "dataset, train_variant, test_accuracy, test_f1, test_precision, test_recall."
         ),
     )
@@ -124,5 +124,5 @@ if __name__ == "__main__":
     main()
 
 """
- python plot_metrics.py best_testing_logs/summerized_results.csv -o plots
+ python plot_metrics.py best_testing_logs/test_summary_results.csv -o plots
 """

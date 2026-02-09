@@ -1,0 +1,37 @@
+Suche nach Index: 172
+
+Gefundene Funktion aus CSV:
+static void rtrs_clt_dev_release(struct device *dev)
+{
+	struct rtrs_clt_sess *clt = container_of(dev, struct rtrs_clt_sess,
+						 dev);
+
+	kfree(clt);
+}
+
+================================================================================
+Suche nach Funktion in primevul_test.jsonl...
+
+Gefunden: 1 Einträge mit dieser Funktion
+
+--- Eintrag 1 ---
+{
+  "idx": 199712,
+  "project": "linux",
+  "commit_id": "8700af2cc18c919b2a83e74e0479038fd113c15d",
+  "project_url": "https://github.com/torvalds/linux",
+  "commit_url": "https://github.com/torvalds/linux/commit/8700af2cc18c919b2a83e74e0479038fd113c15d",
+  "commit_message": "RDMA/rtrs-clt: Fix possible double free in error case\n\nCallback function rtrs_clt_dev_release() for put_device() calls kfree(clt)\nto free memory. We shouldn't call kfree(clt) again, and we can't use the\nclt after kfree too.\n\nReplace device_register() with device_initialize() and device_add() so that\ndev_set_name can() be used appropriately.\n\nMove mutex_destroy() to the release function so it can be called in\nthe alloc_clt err path.\n\nFixes: eab098246625 (\"RDMA/rtrs-clt: Refactor the failure cases in alloc_clt\")\nLink: https://lore.kernel.org/r/20220217030929.323849-1-haris.iqbal@ionos.com\nReported-by: Miaoqian Lin <linmq006@gmail.com>\nSigned-off-by: Md Haris Iqbal <haris.iqbal@ionos.com>\nReviewed-by: Jack Wang <jinpu.wang@ionos.com>\nSigned-off-by: Jason Gunthorpe <jgg@nvidia.com>",
+  "target": 1,
+  "func": "static void rtrs_clt_dev_release(struct device *dev)\n{\n\tstruct rtrs_clt_sess *clt = container_of(dev, struct rtrs_clt_sess,\n\t\t\t\t\t\t dev);\n\n\tkfree(clt);\n}",
+  "func_hash": 64652297556654438298355501352205556509,
+  "file_name": "rtrs-clt.c",
+  "file_hash": 149775209474441169700962555059878991264,
+  "cwe": [
+    "CWE-415"
+  ],
+  "cve": "CVE-2022-29156",
+  "cve_desc": "drivers/infiniband/ulp/rtrs/rtrs-clt.c in the Linux kernel before 5.16.12 has a double free related to rtrs_clt_dev_release.",
+  "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-2022-29156"
+}
+

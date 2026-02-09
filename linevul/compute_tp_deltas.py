@@ -160,6 +160,6 @@ if __name__ == "__main__":
 
 
 """
- python compute_tp_deltas.py best_testing_logs/summerized_results.csv -o test_tp_deltas.csv
+ python compute_tp_deltas.py best_testing_logs/test_summary_results.csv -o test_tp_deltas.csv
  # Standard: liest my_results.csv im aktuellen Verzeichnis und schreibt test_tp_deltas.csv dort hinein
 """

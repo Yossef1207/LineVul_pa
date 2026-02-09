@@ -69,3 +69,24 @@ python 03_augment_with_llm.py --reposvul_train ../primevul/train.csv --csv_vuln 
 
 
 cd /fibus/fs2/14/czt0517/Desktop/pa-yossef/LineVul_pa/data/llm_datasets && curl --header "PRIVATE-TOKEN: $TOKEN" "https://collaborating.tuhh.de/api/v4/projects/e22%2Finstitute-members%2Fcurrent-members%2Fphd%2Ftorge%2Fllm-based-vulnerability-synthesis/repository/files/data%2Fenhanced%2Fcomparison%2Fcodellama-34b%2Fnon-vuln%2Fmerged_results_w_complexity_and_compil.csv/raw?ref=main" -o codellama-34b_non-vuln.csv
+
+
+
+python - <<'PY'
+import pandas as pd
+
+csv_file = "/work/cps/czt0517/LineVul_pa/data/primevul_dataset/val.csv"
+
+df = pd.read_csv(csv_file)
+
+total = len(df)
+target_0 = len(df[df['target'] == 0])
+target_1 = len(df[df['target'] == 1])
+
+print(f"Gesamte Einträge in val.csv: {total}")
+print(f"Einträge mit target = 0: {target_0}")
+print(f"Einträge mit target = 1: {target_1}")
+print(f"\nProzentual:")
+print(f"target = 0: {target_0/total*100:.1f}%")
+print(f"target = 1: {target_1/total*100:.1f}%")
+PY
