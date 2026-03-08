@@ -6,10 +6,10 @@ from pathlib import Path
 csv.field_size_limit(sys.maxsize)
 
 paths = [
-    'LineVul_pa/data/primevul_dataset/test.csv',
-    'LineVul_pa/data/primevul_dataset/train.csv',
-    'LineVul_pa/data/reposvul_dataset/test.csv',
-    'LineVul_pa/data/reposvul_dataset/train.csv',
+    'primevul_dataset/test.csv',
+    'primevul_dataset/train.csv',
+    'reposvul_dataset/test.csv',
+    'reposvul_dataset/train.csv',
 ]
 
 for p in paths:
